@@ -1,0 +1,100 @@
+my_project/
+├── bin/                 # Will contain the binary executable
+├── lib/                 # Will contain the library
+├── include/             # Library headers (function declarations)
+├── src/                 # Source files
+│   ├── main.cpp         # Binary source
+│   └── mathutils.cpp    # Library source
+============================================================================================
+or 
+my_project/
+├── bin/                 # Final executable (output)
+├── lib/                 # Compiled library (.a / .so)
+├── include/             # Library headers (.h / .hpp)
+│   └── mathutils.h
+├── src/
+│   ├── main.cpp         # Program’s entry point
+│   └── mathutils.cpp    # Library implementation
+
+
+
+Bins(Binaries) = These are final executable files that can run directly (like .exe in Windows)
+Example : If ur project is Media Server , the Media Server binary is what we need to run to start server
+Think it of => ready to run programs
+
+why are they used ?
+They are the end product of the project - the actual software the company delivers and runs in production
+
+How they are made ?
+source_code -> compile -> object_files -> link -> binary
+
+-------------------------------------------------------------------------------------------
+
+Libs in linux ( .so)shared objects or (.o)object file and in windows (.dll)
+Libs(libraries) = These are supporting files(like .so or .dll) that contain resuable code used by the binaries
+Example : Instead of writing "log to file" code in every program, you put it once in a logging library -> then all binaries can use it.
+Think it of => Helper toolkits for ur bins
+
+why are they used ?
+they reduce duplications, keep code organized, and make updates easier(fix the lib once, all bins benifit).
+
+Importance in a Company project
+1) Bins are face is your project -> what team or clients run.
+2) Libs are the backbone -> shared functionality without which bins may fail to run.
+3) If a bin is Missing -> you can not run the project
+4) If a lib is missing -> the  bin might start but will crash or fail when it needs that library
+
+                    Compile the Binary
+A) Building Library
+------------------------------------------------------------------
+g++ -c src/mathutils.cpp -Iinclude -o lib/mathutils.o             \
+g++ -> C++ compiler 											  \
+-c -> compile only (dont link,produce obect files) 				  \
+src/mathutils.cpp -> source code file							  \
+-Iinclude -> tells compiler to look for header files in include/  \
+-o lib/mathutils.o -> output compiled object file in lib folder   \
+therefore, it creates mathutils.o an object file. 				  \
+-------------------------------------------------------------------
+
+FOR LINUX use (.so) shared object file as libs for windows use (.dll) as libs
+---------------------------------------------------------------------    
+g++ -shared -o lib/mathutils.so .\lib\mathutils.o                    \
+g++ -> C++ compiler 											     \
+-shared -> builds a shared library (.so = "Shared object" in linux   \
+-o lib/mathutils.so -> output shared library file                    \
+uses the previously compiled mathutils.o 							 \
+---------------------------------------------------------------------
+
+B) Compile the Binary and link it with the library  ||  Building Binary
+----------------------------------------------------------------------------------
+g++ src/main.cpp -Iinclude -Llib -lmathutils -o bin/myapp					      |
+g++ -> C++ compiler 															  |
+src/main.cpp -> main program source file										  |
+-Iinclude -> search path for headers											  |
+-Llib -> search path for libraries(.so files)									  |
+-lmathutils -> link with libmathutils.so (prefix lib and suffix .so are implicit) |
+-o bin/myapp -> produce final binary exexutable									  |
+final result: bin/myapp which uses functions from libmathutils.so 				  |
+-----------------------------------------------------------------------------------
+
+#NOTE -> When we build our binary (eg myapp), the compiler does not copy the entire library inside.
+Instead,it just notes:
+"This Program needs mathutils.so (or mathutils.dll) at runtime"
+At Runtime,when u type ./bin/myapp,The OS loader kicks in:
+A) Linux Loader (ld-linux.so) looks for .so files int his order->
+  ~ RPATH/RUNPATH -> if the binary itself was built with special path baked in
+  ~ LD_LIBRARY_PATH -> an environment variable you can set to point to custom library (lib/).
+ 
+NOW in LINUX u need to explicitly set Environment variables to load the libs(.so) to their respective bins
+LINUX OS need to load the libs to the binary during runtime
+---------------------------------------------------
+export LD_LIBRARY_PATH=lib:$LD_LIBRARY_PATH		   |
+---------------------------------------------------
+											
+
+#Note -> To check what libraries are required by final executables i.e bin is use ...   ldd executable_name
+EXAMPLE - Windows
+g++ main.cpp -o main 
+here main is final execuatble or bin
+Now if we do ->
+ldd main   // it will display all the libraries that are required to run this final executable bin main
